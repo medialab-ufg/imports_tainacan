@@ -1,17 +1,11 @@
 <?php
 
-$base_tombo = 'COL_baseTombo.csv';
-$base_fichaCat = 'COL_fichaCatalografica.csv';
-$base_MD_fichaCat = 'MD_fichaCat.csv';
-$base_MD_Tombo = 'MD_fichaTombo.csv';
-
-
-#Lendo o CSV:
-$arquivo = file($base_MD_Tombo);
+#CSV Data to Array:
+$arquivo = file('MD_CatTombo.csv');
 foreach($arquivo as $k)
-	$csv[]=explode(',',$k);
+	$csv[]=explode('|',$k);
 
-
+#Connecting with Wordpress:
 $_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
 $_SERVER['REQUEST_METHOD'] = "GET";
         
@@ -20,23 +14,24 @@ define( 'SHORTINIT', false );
 require( '/var/www/html/wp-blog-header.php' );
 
 
-#Apaga as Coleções Existentes
+#Delete Existing Collections:
 
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
 
 $collections = $collectionsRepo->fetch([], 'OBJECT');
 foreach ($collections as $col) {
-	echo "Apagando coleção: ", $col->get_id(), "\n";
+	echo "Deleting collection ", $col->get_id(), "\n";
 	$collectionsRepo->delete([$col->get_id(), true]);
 }
 
 
-#Inserindo Coleção e Metadados
+#Create Collection and Metadata:
+
 $fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
 $collection = new \Tainacan\Entities\Collection();
-$collection->set_name('Base Tombo');
+$collection->set_name('Museu do Índio');
 $collection->set_status('publish');
-$collection->set_description('Base com as informações de Tombo do Museu do Índio');
+$collection->set_description('Coleção com informações sobre os itens museológicos do Museu do Índio.');
 
 if ($collection->validate()) {
 
@@ -71,8 +66,10 @@ if ($collection->validate()) {
 	foreach ($collection_core_fields as $corefield) {
 		if (isset( $coreFields[$corefield->get_name()] )) {
 			$line = $coreFields[$corefield->get_name()];
+			$line = $line+1;
 			$corefield->set_name($csv[$line][0]);
 			$corefield->set_description($csv[$line][1]);
+			echo $line, "\n";
 			if ($corefield->validate()){
 				$insertedField = $fieldsRepo->insert($corefield);
 			} else {
@@ -85,7 +82,7 @@ if ($collection->validate()) {
 
 	if ($insertedCollection->validate()) {
 		$insertedCollection = $collectionsRepo->insert($insertedCollection);
-		echo 'I still have the same ID! ' . $insertedCollection->get_id();
+		echo 'Collection created with ID -  ' . $insertedCollection->get_id(), "\n";
 	} else {
 		$errors = $insertedCollection->get_errors();
 	}

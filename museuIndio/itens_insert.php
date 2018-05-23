@@ -1,17 +1,12 @@
 
 <?php
 
-$base_tombo = 'COL_baseTombo.csv';
-$base_fichaCat = 'COL_fichaCatalografica.csv';
-
-
-
-#Lendo o CSV:
-$arquivo = file($base_tombo);
+#CSV to Array:
+$arquivo = file('Base_MuseuIndio.csv');
 foreach($arquivo as $k)
 	$csv[]=explode('|',$k);
 
-
+#Connecting to Wordpress
 $_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
 $_SERVER['REQUEST_METHOD'] = "GET";
         
@@ -19,24 +14,23 @@ define( 'WP_USE_THEMES', false );
 define( 'SHORTINIT', false );
 require( '/var/www/html/wp-blog-header.php' );
 
-
+#Generating object instances for Collection, Fields, Items, and Item_Metadata
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
 $fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
+$itemsRepo = \Tainacan\Repositories\Items::get_instance();
+$itemMetadataRepo = \Tainacan\Repositories\Item_Metadata::get_instance();
 
-
-
-$collection = $collectionsRepo->fetch(['name'=>'Base Tombo'], 'OBJECT');
+#Getting the Colletion
+$collection = $collectionsRepo->fetch(['name'=>'Museu do Índio'], 'OBJECT');
 $collection = $collection[0];
 
-for ($j=1; $j<sizeof($csv[0]); $j++){
+#Getting metadata title from csv array
+for ($j=0; $j<sizeof($csv[0]); $j++){
 	$headers[] = trim($csv[0][$j]);
 }
 
 
-
-$itemsRepo = \Tainacan\Repositories\Items::get_instance();
-$itemMetadataRepo = \Tainacan\Repositories\Item_Metadata::get_instance();
-
+#Inserting Items
 for ($line=1; $line <sizeof($csv); $line++){
 
 	$item = new \Tainacan\Entities\Item();
@@ -55,21 +49,29 @@ for ($line=1; $line <sizeof($csv); $line++){
 			$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $field);
 			$itemMetadata->set_value($csv[$line][$i]);
 
+
 			if ($itemMetadata->validate()) {
 				$itemMetadataRepo->insert($itemMetadata);			
 				} else {
 				echo 'erro no metadado ', $field->get_name(), ' no item ', $csv[$line][0];
 			}
-
 		}
 
 		$item->set_status('publish');
 
 		if ($item->validate()) {
 			$item = $itemsRepo->insert($item);
-			echo 'Item', $csv[$line][0], 'inserido', "\n"
+			echo 'Item ', $csv[$line][0], ' - inserted', "\n";
+			echo sizeof($csv)-$line, ' remain', "\n";
+			echo ($line/sizeof($csv))*100, '% Completed', "\n" ,"\n";
 		}
-
+		else{
+			echo 'erro no preenchientos dos campos', $line, "\n";
+			$errors = $item->get_errors();
+			var_dump($errors); 
+			echo  "\n\n";
+			die;
+		}
 
 	} else {
 		echo 'erro no item ', $line;
