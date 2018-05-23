@@ -39,9 +39,9 @@ if ($collection->validate()) {
 
 	$coreFields = [];
 
-	for ($line=1; $line < sizeof($csv); $line++){
+	for ($line=1; $line <sizeof($csv); $line++){
 
-		if ( trim($csv[$line][3]) ) {
+		if ( trim($csv[$line][3])) {
 			$coreFields[ trim($csv[$line][3]) ] = $line;
 			continue;
 		}
@@ -66,7 +66,7 @@ if ($collection->validate()) {
 	foreach ($collection_core_fields as $corefield) {
 		if (isset( $coreFields[$corefield->get_name()] )) {
 			$line = $coreFields[$corefield->get_name()];
-			$line = $line+1;
+			$line = $line;
 			$corefield->set_name($csv[$line][0]);
 			$corefield->set_description($csv[$line][1]);
 			echo $line, "\n";

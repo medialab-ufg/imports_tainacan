@@ -40,7 +40,7 @@ for ($line=1; $line <sizeof($csv); $line++){
 	if ($item->validate())  {
 		$item = $itemsRepo->insert($item);
 
-		for ($i = 0; $i <sizeof($csv[$line]); $i++) {
+		for ($i = 0; $i <=sizeof($csv[$line]); $i++) {
 
 			$field = $fieldsRepo->fetch(['name' => $headers[$i]], 'OBJECT');
 			$field = $field[0];
