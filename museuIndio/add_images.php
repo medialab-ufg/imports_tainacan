@@ -1,10 +1,5 @@
 <?php
 
-#CSV to Array:
-$arquivo = file('Base_MuseuIndio.csv');
-foreach($arquivo as $k)
-	$csv[]=explode('|',$k);
-
 #Connecting to Wordpress
 $_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
 $_SERVER['REQUEST_METHOD'] = "GET";
@@ -17,8 +12,6 @@ $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
 $fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
 $itemsRepo = \Tainacan\Repositories\Items::get_instance();
 $itemMedia = \Tainacan\Media::get_instance();
-
-#$item = $itemRepo->fetch(, 'OBJECT');
 
 $fieldDocumento = $fieldsRepo->fetch(['name'=>'v070'], 'OBJECT');
 $fieldDocumento = $fieldDocumento[0];
@@ -64,15 +57,13 @@ function mindio_extract_img_urls_from_url($url) {
 	return $urls;
 
 }
-//var_dump(mindio_extract_img_urls_from_url("http://base.museudoindio.gov.br/memoteca/semu/trançados/wajapi/01_2_6/index.html")); die;
-
 foreach ($items as $item) {
 	$metaDocument = new \Tainacan\Entities\Item_Metadata_Entity($item, $fieldDocumento);
-	//var_dump($metaDocument->get_value());
+
 	echo "Processando item {$item->get_title()}\n\n";
 
 	$idMedia = $itemMedia->insert_attachment_from_url($metaDocument->get_value());
-	echo "Adicionando dpcumento: {$metaDocument->get_value()} \n";
+	echo "Adicionando documento: {$metaDocument->get_value()} \n";
 	
 
 	if (false != $idMedia){
@@ -103,12 +94,7 @@ foreach ($items as $item) {
 	}
 
 	echo "\n\n";
-
-
 	
-
-
 }
-
 
 ?>
