@@ -32,20 +32,11 @@ $items = $itemsRepo->fetch(['meta_query' => $meta_query, 'posts_per_page' => -1]
 
 
 function mindio_extract_img_urls_from_url($url) {
-
 	
-	try{
-		$encodedUrl = urlencode($url);
-		$urlEncoded = str_replace(['%2F', '%3A'], ['/', ':'], $encodedUrl);
-		$page_content = file_get_contents($urlEncoded);
-		} catch (Exception $e){
-			echo "Exceção Capturada: ", $e->getMessage(), "\n";
-		}
-
-	
-	$url = rawurldecode($url);
-	$page_content = file_get_contents($url);		
-	$base_url = substr($url, 0, strrpos($url, '/') + 1);
+	$encodedUrl = urlencode($url);
+	$urlEncoded = str_replace(['%2F', '%3A'], ['/', ':'], $encodedUrl);
+	$page_content = file_get_contents($urlEncoded);
+	$base_url = substr($urlEncoded, 0, strrpos($urlEncoded, '/') + 1);
 	$urls = [];
 	
 	if ($page_content) {
