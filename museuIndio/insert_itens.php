@@ -19,17 +19,18 @@ $collection = $collectionsRepo->fetch(['name'=>'Museu do Índio'], 'OBJECT');
 $collection = $collection[0];
 
 
-$fh = fopen("baseMuseuIndio.csv", "r") or die("ERROR OPENING DATA");
+$fh = fopen("baseMuseuIndio(test).csv", "r") or die("ERROR OPENING DATA");
 
 while (($data = fgetcsv($fh, 0, ",")) == TRUE){
 	$linecount++;
 }
+$linecount = $linecount-1;
 fclose($fh);
 
 
 #Getting metadata title from csv array
 
-if (($handle = fopen("baseMuseuIndio.csv", "r")) == TRUE) {
+if (($handle = fopen("baseMuseuIndio(test).csv", "r")) == TRUE) {
 	$cont = 0;
 	while (($data = fgetcsv($handle, 0, ",")) == TRUE){
 		
