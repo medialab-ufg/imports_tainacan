@@ -13,10 +13,10 @@ $fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
 $itemsRepo = \Tainacan\Repositories\Items::get_instance();
 $itemMedia = \Tainacan\Media::get_instance();
 
-$fieldDocumento = $fieldsRepo->fetch(['name'=>'v070'], 'OBJECT');
+$fieldDocumento = $fieldsRepo->fetch(['name'=>'V070 - Imagem do objeto'], 'OBJECT');
 $fieldDocumento = $fieldDocumento[0];
 
-$fieldAttch = $fieldsRepo->fetch(['name'=>'v084'], 'OBJECT');
+$fieldAttch = $fieldsRepo->fetch(['name'=>'V084 - Outras Imagens'], 'OBJECT');
 $fieldAttch = $fieldAttch[0];
 
 $meta_query = [
@@ -33,30 +33,42 @@ $items = $itemsRepo->fetch(['meta_query' => $meta_query, 'posts_per_page' => -1]
 
 function mindio_extract_img_urls_from_url($url) {
 
-	$encodedUrl = urlencode($url);
-	$url = str_replace(['%2F', '%3A'], ['/', ':'], $encodedUrl);
-
-	$page_content = file_get_contents($url);
-	$base_url = substr($url, 0, strrpos($url, '/') + 1);
-	$urls = [];
-
-	if ($page_content) {
-
-		preg_match_all('/src=[\"\']([^\"\']+\.jpg)/', $page_content, $matches);
-		if (is_array($matches[1])) {
-			foreach ($matches[1] as $crush) {
-				$urls[] = $base_url . $crush;
-			}
+	
+	try{
+		$encodedUrl = urlencode($url);
+		$urlEncoded = str_replace(['%2F', '%3A'], ['/', ':'], $encodedUrl);
+		$page_content = file_get_contents($urlEncoded);
+		} catch (Exception $e){
+			echo "Exceção Capturada: ", $e->getMessage(), "\n";
 		}
 
-
-	} else{
-		echo 'Erro ao adquirir o link ', $url, "\n\n";
-	}
-
+	
+	$url = rawurldecode($url);
+	$page_content = file_get_contents($url);		
+	$base_url = substr($url, 0, strrpos($url, '/') + 1);
+	$urls = [];
+	
+	if ($page_content) {
+	
+			preg_match_all('/href=[\"\']([^\"\']+\.html)/', $page_content, $matches);
+			if ($matches[1]){
+				foreach($matches[1] as $end){
+					$html_content = file_get_contents($base_url . $end);
+					preg_match_all('/src=[\"\']([^\"\']+\.jpg)/', $html_content, $matches);
+					$urls[] = $base_url . $matches[1][0];
+					}
+			}else {
+				preg_match_all('/src=[\"\']([^\"\']+\.jpg)/', $page_content, $matches);
+				if (is_array($matches[1])) {
+					foreach ($matches[1] as $crush) {
+						$urls[] = $base_url . $crush;
+					}
+				}
+			}
+		}	
 	return $urls;
-
 }
+
 foreach ($items as $item) {
 	$metaDocument = new \Tainacan\Entities\Item_Metadata_Entity($item, $fieldDocumento);
 
