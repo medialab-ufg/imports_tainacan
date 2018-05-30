@@ -20,7 +20,7 @@ foreach ($collections as $col) {
 $fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
 $collection = new \Tainacan\Entities\Collection();
 $collection->set_name('Museu do Índio');
-$collection->set_status('publish');
+$collection->set_status('private');
 $collection->set_description('Coleção com informações sobre os itens museológicos do Museu do Índio.');
 
 $cont = 0;
