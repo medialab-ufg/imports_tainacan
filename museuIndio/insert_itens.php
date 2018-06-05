@@ -19,22 +19,22 @@ $collection = $collectionsRepo->fetch(['name'=>'Museu do Índio'], 'OBJECT');
 $collection = $collection[0];
 
 
-$fh = fopen("baseMuseuIndio(test).csv", "r") or die("ERROR OPENING DATA");
+$fh = fopen("baseMindio(teste).csv", "r") or die("ERROR OPENING DATA");
 
 while (($data = fgetcsv($fh, 0, ",")) == TRUE){
 	$linecount++;
 }
-$linecount = $linecount-1;
 fclose($fh);
 
 
 #Getting metadata title from csv array
 
-if (($handle = fopen("baseMuseuIndio(test).csv", "r")) == TRUE) {
+if (($handle = fopen("baseMindio(teste).csv", "r")) == TRUE) {
 	$cont = 0;
 	while (($data = fgetcsv($handle, 0, ",")) == TRUE){
 		
 		if($cont == 0){
+			echo "Tratando primeira linha \n";
 			$headers = array_map('trim', $data);
 		}else{
 			$item = new \Tainacan\Entities\Item();
@@ -80,7 +80,8 @@ if (($handle = fopen("baseMuseuIndio(test).csv", "r")) == TRUE) {
 		}
 		$cont+=1;
 	}
-}
 fclose($handle);
+}
+
 
 ?>
