@@ -1,11 +1,14 @@
 <?php
 #Connecting with Wordpress:
 $_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
+<?php
+#Connecting with Wordpress:
+$_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
 $_SERVER['REQUEST_METHOD'] = "GET";
         
 define( 'WP_USE_THEMES', false );
 define( 'SHORTINIT', false );
-require( 'C:\wamp\www\wordpress\wp-blog-header.php' );
+require( '/var/www/html/wp-blog-header.php' );
 
 #Delete Existing Collections:
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
@@ -31,7 +34,7 @@ if ($collection->validate()) {
 	$insertedCollection = $collectionsRepo->insert($collection);
 	
 	
-	if (($handle = fopen("metadadosMIndio.csv", "r")) == TRUE) {
+	if (($handle = fopen("metadadosMIndio(teste).csv", "r")) == TRUE) {
 		
 		$collection_core_fields = $fieldsRepo->get_core_fields($insertedCollection);
 		
@@ -62,6 +65,7 @@ if ($collection->validate()) {
 						$taxonomy->set_allow_insert(True);
 						if ($taxonomy->validate()) {
 							$taxonomy = $taxonomyRepo->insert($taxonomy);
+							$taxonomy->set_status('publish');
 							echo 'Taxonomy created with ID -  ' . $taxonomy->get_id(), "\n";
 							
 							} else {
