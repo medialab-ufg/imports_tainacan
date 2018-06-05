@@ -5,7 +5,7 @@ $_SERVER['REQUEST_METHOD'] = "GET";
         
 define( 'WP_USE_THEMES', false );
 define( 'SHORTINIT', false );
-require( '/var/www/html/wp-blog-header.php' );
+require( 'C:\wamp\www\wordpress\wp-blog-header.php' );
 
 #Delete Existing Collections:
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
@@ -20,8 +20,10 @@ foreach ($collections as $col) {
 $fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
 $collection = new \Tainacan\Entities\Collection();
 $collection->set_name('Museu do Índio');
-$collection->set_status('private');
+$collection->set_status('publish');
 $collection->set_description('Coleção com informações sobre os itens museológicos do Museu do Índio.');
+
+$taxonomyRepo = \Tainacan\Repositories\Taxonomies::get_instance();
 
 $cont = 0;
 if ($collection->validate()) {
@@ -53,13 +55,34 @@ if ($collection->validate()) {
 						}
 					}
 				} else {
-
-					$metadado = new \Tainacan\Entities\Field();
-					$metadado->set_collection($insertedCollection);
-					$metadado->set_name(trim($data[0]));
-					$metadado->set_description($data[1]);
-					$metadado->set_field_type(trim($data[2]));
-					$metadado->set_status('publish');
+					if (trim($data[2]) == 'Tainacan\Field_Types\Category'){
+						$taxonomy = new \Tainacan\Entities\Taxonomy;
+						$taxonomy->set_name(trim($data[0]));
+						$taxonomy->set_description("Taxonomia para o metadado ", trim($data[0]));
+						$taxonomy->set_allow_insert(True);
+						if ($taxonomy->validate()) {
+							$taxonomy = $taxonomyRepo->insert($taxonomy);
+							echo 'Taxonomy created with ID -  ' . $taxonomy->get_id(), "\n";
+							
+							} else {
+								$errors = $taxonomy->get_errors();
+							}
+						$metadado = new \Tainacan\Entities\Field();
+						$metadado->set_collection($insertedCollection);
+						$metadado->set_name(trim($data[0]));
+						$metadado->set_description($data[1]);
+						$metadado->set_field_type_options(['taxonomy_id'=> $taxonomy->get_id()]);
+						$metadado->set_field_type(trim($data[2]));				
+						
+					}
+					else{
+						$metadado = new \Tainacan\Entities\Field();
+						$metadado->set_collection($insertedCollection);
+						$metadado->set_name(trim($data[0]));
+						$metadado->set_description($data[1]);
+						$metadado->set_field_type(trim($data[2]));
+						$metadado->set_status('publish');
+					}
 				
 					if ($metadado->validate()){
 						$insertedField = $fieldsRepo->insert($metadado);
