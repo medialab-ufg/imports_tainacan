@@ -31,6 +31,7 @@ fclose($fh);
 
 if (($handle = fopen("baseMindio(teste).csv", "r")) == TRUE) {
 	$cont = 0;
+	
 	while (($data = fgetcsv($handle, 0, ",")) == TRUE){
 		
 		if($cont == 0){
@@ -39,6 +40,7 @@ if (($handle = fopen("baseMindio(teste).csv", "r")) == TRUE) {
 		}else{
 			$item = new \Tainacan\Entities\Item();
 			$item->set_title($data[0]);
+			$item->set_status('publish');
 			$item->set_collection($collection);
 			
 			if ($item->validate())  {
@@ -49,17 +51,23 @@ if (($handle = fopen("baseMindio(teste).csv", "r")) == TRUE) {
 					$field = $fieldsRepo->fetch(['name' => $headers[$i]], 'OBJECT');
 					$field = $field[0];
 					
-					$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $field);
-					$itemMetadata->set_value($data[$i]);
+					if ($field->get_field_type() == 'Tainacan\Field_Types\Category'){
+						$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $field);
+						$category_value = explode("||",$data[$i]);
+						$itemMetadata->set_value($category_value);
+					}else{
+						$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $field);
+						$itemMetadata->set_value($data[$i]);
+					}
 					
 					if ($itemMetadata->validate()) {
 						$itemMetadataRepo->insert($itemMetadata);			
 						} else {
 							echo 'Erro no metadado ', $field->get_name(), ' no item ', $data[0];
+							$erro = $itemMetadata->get_errors();
+							echo var_dump($erro);
 						}
 				}
-				$item->set_status('publish');
-				
 				if ($item->validate()) {
 					$item = $itemsRepo->insert($item);
 					echo 'Item ', $data[0], ' - inserted', "\n";
