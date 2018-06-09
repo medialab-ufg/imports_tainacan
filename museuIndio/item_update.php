@@ -17,7 +17,6 @@ $fieldDocumento = $fieldsRepo->fetch(['name'=>'V018 – Nome do Objeto'], 'OBJEC
 $fieldDocumento = $fieldDocumento[0];
 
 $items = $itemsRepo->fetch(['title' => 'Sugerir Excluir', 'posts_per_page' => -1], $fieldDocumento->get_collection(), 'OBJECT');
-echo var_dump($items); die;
 
 foreach($items as $item){
 	$item->set_status('Draft');
