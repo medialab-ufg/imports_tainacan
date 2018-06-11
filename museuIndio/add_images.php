@@ -6,7 +6,7 @@ $_SERVER['REQUEST_METHOD'] = "GET";
         
 define( 'WP_USE_THEMES', false );
 define( 'SHORTINIT', false );
-require( '/var/www/html/wp-blog-header.php' );
+require( 'C:\wamp\www\wordpress\wp-blog-header.php' );
 
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
 $fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
@@ -59,6 +59,8 @@ function mindio_extract_img_urls_from_url($url) {
 		}	
 	return $urls;
 }
+$conta = 1;
+$items_size = sizeof($items);
 
 foreach ($items as $item) {
 	$metaDocument = new \Tainacan\Entities\Item_Metadata_Entity($item, $fieldDocumento);
@@ -73,6 +75,7 @@ foreach ($items as $item) {
 		$item->set_document($idMedia);
 		$item->set_document_type('attachment');
 		$item->set__thumbnail_id($idMedia);
+		
 		if ($item->validate()){
 			$itemsRepo->insert($item);
 			echo "Salvando item com documento setado\n";
@@ -80,8 +83,7 @@ foreach ($items as $item) {
 			echo 'Item não validado: ', $item->get_title();
 		} 
 		
-
-	} else {
+	}else {
 		echo 'Erro ao adicionar a media ', $metaDocument->get_value(), "\n\n";
 	}
 
@@ -96,8 +98,9 @@ foreach ($items as $item) {
 		echo "Adicionando anexo: $image \n";
 	}
 
+	echo "Remain ", $items_size-$conta;
 	echo "\n\n";
-	
+	$conta+=1;
 }
 
 ?>
