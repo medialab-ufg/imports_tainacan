@@ -1,3 +1,5 @@
+#OBS. ALTERAR A EXIBIÇÃO DOS METADADOS PARA NUNCA MOSTRAR.
+
 <?php
 #Connecting with Wordpress:
 $_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
