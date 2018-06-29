@@ -8,17 +8,17 @@ define( 'WP_USE_THEMES', false );
 define( 'SHORTINIT', false );
 require( '/var/www/html/wp-blog-header.php' );
 
-#Generating object instances for Collection, Fields, Items, and Item_Metadata
+#Generating object instances for Collection, Metadata, Items, and Item_Metadata
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
-$fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
+$metadataRepo = \Tainacan\Repositories\Metadata::get_instance();
 $itemsRepo = \Tainacan\Repositories\Items::get_instance();
 $itemMetadataRepo = \Tainacan\Repositories\Item_Metadata::get_instance();
 
-#Getting the Colletion
+#Getting the Colletion -- # MODIFICAR O NOME DA COLEÇÃO PARA O DESEJADO
 $collection = $collectionsRepo->fetch(['name'=>'Museu do Índio'], 'OBJECT');
 $collection = $collection[0];
 
-
+# MODIFICAR O NOME DO ARQUIVO E SE HOUVER, O CAMINHO PARA O ARQUIVO CSV
 $fh = fopen("baseMindio(teste).csv", "r") or die("ERROR OPENING DATA");
 
 while (($data = fgetcsv($fh, 0, ",")) == TRUE){
@@ -29,6 +29,7 @@ fclose($fh);
 
 #Getting metadata title from csv array
 
+# MODIFICAR O NOME DO ARQUIVO E SE HOUVER, O CAMINHO PARA O ARQUIVO CSV
 if (($handle = fopen("baseMindio(teste).csv", "r")) == TRUE) {
 	$cont = 0;
 	
@@ -48,22 +49,22 @@ if (($handle = fopen("baseMindio(teste).csv", "r")) == TRUE) {
 				
 				for ($i = 0; $i <=sizeof($data); $i++) {
 					
-					$field = $fieldsRepo->fetch(['name' => $headers[$i]], 'OBJECT');
-					$field = $field[0];
+					$metadata = $metatadaRepo->fetch(['name' => $headers[$i]], 'OBJECT');
+					$metadata = $metadata[0];
 					
-					if ($field->get_field_type() == 'Tainacan\Field_Types\Category'){
-						$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $field);
+					if ($metatada->get_metadata_type() == 'Tainacan\Metadata_Types\Category'){
+						$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $metadata);
 						$category_value = explode("||",$data[$i]);
 						$itemMetadata->set_value($category_value);
 					}else{
-						$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $field);
+						$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $metadata);
 						$itemMetadata->set_value($data[$i]);
 					}
 					
 					if ($itemMetadata->validate()) {
 						$itemMetadataRepo->insert($itemMetadata);			
 						} else {
-							echo 'Erro no metadado ', $field->get_name(), ' no item ', $data[0];
+							echo 'Erro no metadado ', $metadata->get_name(), ' no item ', $data[0];
 							$erro = $itemMetadata->get_errors();
 							echo var_dump($erro);
 						}
