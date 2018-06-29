@@ -9,25 +9,27 @@ define( 'SHORTINIT', false );
 require( 'C:\wamp\www\wordpress\wp-blog-header.php' );
 
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
-$fieldsRepo = \Tainacan\Repositories\Fields::get_instance();
+$metadataRepo = \Tainacan\Repositories\Metadata::get_instance();
 $itemsRepo = \Tainacan\Repositories\Items::get_instance();
 $itemMedia = \Tainacan\Media::get_instance();
 
-$fieldDocumento = $fieldsRepo->fetch(['name'=>'V070 - Imagem do objeto'], 'OBJECT');
-$fieldDocumento = $fieldDocumento[0];
+#DEFINIR O VALOR DO CAMPO COM O THUMBNAIL
+$metadataDocumento = $metadataRepo->fetch(['name'=>'V070 - Imagem do objeto'], 'OBJECT');
+$metadataDocumento = $metadataDocumento[0];
 
-$fieldAttch = $fieldsRepo->fetch(['name'=>'V084 - Outras Imagens'], 'OBJECT');
-$fieldAttch = $fieldAttch[0];
+#DEFINIR O VALOR DO CAMPO COM A URL DAS IMAGENS DE ANEXO
+$metadataAttch = $metadataRepo->fetch(['name'=>'V084 - Outras Imagens'], 'OBJECT');
+$metadataAttch = $metadataAttch[0];
 
 $meta_query = [
 	[
-		'key' => $fieldDocumento->get_id(),
+		'key' => $metadataDocumento->get_id(),
 		'value' => '',
 		'compare' => 'NOT IN'
 	]
 ];
 
-$items = $itemsRepo->fetch(['meta_query' => $meta_query, 'posts_per_page' => -1], $fieldAttch->get_collection(), 'OBJECT');
+$items = $itemsRepo->fetch(['meta_query' => $meta_query, 'posts_per_page' => -1], $metadataAttch->get_collection(), 'OBJECT');
 
 
 
@@ -63,7 +65,7 @@ $conta = 1;
 $items_size = sizeof($items);
 
 foreach ($items as $item) {
-	$metaDocument = new \Tainacan\Entities\Item_Metadata_Entity($item, $fieldDocumento);
+	$metaDocument = new \Tainacan\Entities\Item_Metadata_Entity($item, $metadataDocumento);
 
 	echo "Processando item {$item->get_title()}\n\n";
 
@@ -87,7 +89,7 @@ foreach ($items as $item) {
 		echo 'Erro ao adicionar a media ', $metaDocument->get_value(), "\n\n";
 	}
 
-	$metaAttach = new \Tainacan\Entities\Item_Metadata_Entity($item, $fieldAttch);
+	$metaAttach = new \Tainacan\Entities\Item_Metadata_Entity($item, $metadataAttch);
 	
 	echo "Pegando urls das imagens a partir do link html... ";
 	$images = mindio_extract_img_urls_from_url($metaAttach->get_value());
