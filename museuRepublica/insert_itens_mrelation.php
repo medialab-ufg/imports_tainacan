@@ -15,26 +15,43 @@ $metadataRepo = \Tainacan\Repositories\Metadata::get_instance();
 $itemsRepo = \Tainacan\Repositories\Items::get_instance();
 $itemMetadataRepo = \Tainacan\Repositories\Item_Metadata::get_instance();
 
+#################################
+
 #Setting relational collections
-/*
 $pessoas_collection = $collectionsRepo->fetch(['name'=>'Museu da República - Pessoas'], 'OBJECT');
 $pessoas_collection = $pessoas_collection[0];
 
 $entidades_collection = $collectionsRepo->fetch(['name'=>'Museu da República - Entidades'], 'OBJECT');
 $entidades_collection = $entidades_collection[0];
 
-$pessoas_id = $metadataRepo->fetch(['name'=>'ID Pessoas'],[$pessoas_collection], 'OBJECT');
-$pessoas_id = $pessoas_id[0];
+#Array Itens de Pessoa
+$itens_pessoas = $itemsRepo->fetch(['title'=>'', 'posts_per_page'=> '-1'],$pessoas_collection, 'OBJECT');
 
-$entidades_id = $metadataRepo->fetch(['name'=>'ID'],[$entidades_collection], 'OBJECT');
-$entidades_id = $entidades_id[0];
-*/
+foreach ($itens_pessoas as $item_pessoa){
+	
+	$itemMetadataPessoa = $itemMetadataRepo->fetch($item_pessoa,$metadata[0], ['title'=>'ID Pessoa']);
+	
+	$array_pessoas [$itemMetadataPessoa[0]->get_value()] = $item_pessoa;
+}
+
+#Array Itens de Entidade
+$itens_entidades = $itemsRepo->fetch(['title'=>'', 'posts_per_page'=> '-1'],$entidades_collection, 'OBJECT');
+
+foreach ($itens_entidades as $item_entidade){
+	
+	$itemMetadataEntidade = $itemMetadataRepo->fetch($item_entidade,$metadata[0], ['title'=>'ID Entidade']);
+	
+	$array_entidades [$itemMetadataEntidade[0]->get_value()] = $item_entidade;
+}
+
+#################################
 
 #Getting the Colletion
-$collection = $collectionsRepo->fetch(['name'=>'Museu da República - Pessoas (Teste)'], 'OBJECT');
+$collection = $collectionsRepo->fetch(['name'=>'Museu da República - Museu'], 'OBJECT');
 $collection = $collection[0];
 
-$fh = fopen("Collections/Teste/pessoas_itens.csv", "r") or die("ERROR OPENING DATA");
+
+$fh = fopen("tables_import/itens_museu(t).csv", "r") or die("ERROR OPENING DATA");
 
 while (($data = fgetcsv($fh, 0, ",")) == TRUE){
 	$linecount++;
@@ -44,7 +61,7 @@ fclose($fh);
 
 #Getting metadata title from csv array
 
-if (($handle = fopen("Collections/Teste/pessoas_itens.csv", "r")) == TRUE) {
+if (($handle = fopen("tables_import/itens_museu(t).csv", "r")) == TRUE) {
 	
 	$cont = 0;
 	
@@ -82,7 +99,22 @@ if (($handle = fopen("Collections/Teste/pessoas_itens.csv", "r")) == TRUE) {
 						
 						$itemMetadata = new \Tainacan\Entities\Item_Metadata_Entity($item, $metadatum);
 						$relationship_value = explode("||",$data[$i]);
-						$itemMetadata->set_value($relationship_value);
+						$relationship_array = [];
+						
+						if (strpos($metadatum->get_name(), 'Pessoa')!== false){
+							foreach($relationship_value as $item_id){
+								echo $array_pessoas[$item_id]->get_id();
+								echo "\n";
+								$relationship_array [] = $array_pessoas[$item_id]->get_id();
+							}
+						}
+						else if (strpos($metadatum->get_name(), 'Entidade')!== false){
+							foreach($relationship_value as $item_id){
+								$relationship_array [] = $array_entidades[$item_id]->get_id();
+							}
+						}
+						
+						$itemMetadata->set_value($relationship_array);
 					
 					}else{
 						
