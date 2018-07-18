@@ -11,9 +11,9 @@ define( 'SHORTINIT', false );
 #Path of wp
 require( 'C:\wamp\www\wordpress\wp-blog-header.php' );
 
-
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
 $metadataRepo = \Tainacan\Repositories\Metadata::get_instance();
+$taxonomyRepo = \Tainacan\Repositories\Taxonomies::get_instance();
 
 #Setting relational collections
 
@@ -23,14 +23,10 @@ $pessoas_collection = $pessoas_collection[0];
 $pessoas_id = $metadataRepo->fetch(['name'=>'ID Pessoa', 'collection_id'=>$pessoas_collection->get_id()], 'OBJECT');
 $pessoas_id = $pessoas_id[0];
 
-
-
 $entidades_collection = $collectionsRepo->fetch(['name'=>'Museu da República - Entidades'], 'OBJECT');
 $entidades_collection = $entidades_collection[0];
 
-
-
-$entidades_id = $metadataRepo->fetch(['name'=>'ID', 'collection_id'=>$entidades_collection->get_id()], 'OBJECT');
+$entidades_id = $metadataRepo->fetch(['name'=>'ID Entidade', 'collection_id'=>$entidades_collection->get_id()], 'OBJECT');
 $entidades_id = $entidades_id[0];
 
 #Delete Existing Collections:
@@ -44,19 +40,16 @@ foreach ($collections as $col) {
 
 
 #Create Collection and Metadata:
-$taxonomyRepo = \Tainacan\Repositories\Taxonomies::get_instance();
-
 $collection = new \Tainacan\Entities\Collection();
 $collection->set_name('Museu da República - Museu');
 $collection->set_status('publish');
-$collection->set_description('Coleção com informações sobre os objetos de museu.');
-
+$collection->set_description('Coleção com informações de museu.');
 
 $cont = 0;
 if ($collection->validate()) {
 	$insertedCollection = $collectionsRepo->insert($collection);
 
-	if (($handle = fopen("Collections/Teste/museu_collection.csv", "r")) == TRUE) {
+	if (($handle = fopen("tables_import/metadata_museu.csv", "r")) == TRUE) {
 		
 		$collection_core_metadata = $metadataRepo->get_core_metadata($insertedCollection);
 		
@@ -64,7 +57,7 @@ if ($collection->validate()) {
 			if ($cont == 0){
 				echo "Pulando linha das colunas", "\n";
 			} else{
-				if (trim($data[3]) == 'Description' OR trim($data[3]) == 'Title' ){
+				if (trim($data[3]) == 'Description' OR trim($data[3]) == 'Title'){
 					foreach ($collection_core_metadata as $coreMetadata) {
 						if($coreMetadata->get_name() == $data[3]){
 							$coreMetadata->set_name($data[0]);
@@ -189,4 +182,3 @@ if ($collection->validate()) {
 	die;
 }
 ?>
-
