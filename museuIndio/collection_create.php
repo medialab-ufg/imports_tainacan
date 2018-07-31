@@ -66,7 +66,9 @@ if ($collection->validate()) {
 								var_dump($error);
 						}
 						
-						$metadata_type_options = ['taxonomy_id' => $insertedTaxonomy->get_id(), 'input_type' => 'tainacan-taxonomy-tag-input', 'allow_new_terms' => 'yes', 'multiple'=>'yes'];
+						$metadata_type_options = ['taxonomy_id' => $insertedTaxonomy->get_id(), 
+									  'input_type' => 'tainacan-taxonomy-tag-input', 
+									  'allow_new_terms' => 'yes', 'multiple'=>'yes'];
 						
 						$metadado = new \Tainacan\Entities\Metadatum();
 						$metadado->set_collection($insertedCollection);
