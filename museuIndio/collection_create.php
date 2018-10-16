@@ -1,3 +1,5 @@
+#OBS. ALTERAR A EXIBIÇÃO DOS METADADOS PARA NUNCA MOSTRAR.
+
 <?php
 #Connecting with Wordpress:
 $_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
@@ -7,16 +9,25 @@ define( 'WP_USE_THEMES', false );
 define( 'SHORTINIT', false );
 
 #Path of wp
-require( '/home/l3p/apache_sites/museudarepublica.medialab.ufg.br/web/wp-blog-header.php' );
+require('/var/www/html/wp-blog-header.php');
 
 $collectionsRepo = \Tainacan\Repositories\Collections::get_instance();
 $metadataRepo = \Tainacan\Repositories\Metadata::get_instance();
 $taxonomyRepo = \Tainacan\Repositories\Taxonomies::get_instance();
 
+#Delete Existing Collections:
+/*
+$collections = $collectionsRepo->fetch([], 'OBJECT');
+foreach ($collections as $col) {
+	echo "Deleting collection ", $col->get_id(), "\n";
+	$collectionsRepo->delete([$col->get_id(), true]);
+}
+*/
+
 
 #Create Collection and Metadata:
 $collection = new \Tainacan\Entities\Collection();
-$collection->set_name('Museu do Índio - Julho/18');
+$collection->set_name('Museu do Índio');
 $collection->set_status('publish');
 $collection->set_description('Coleção com informações sobre os objetos do Museu do Índio.');
 
@@ -24,7 +35,7 @@ $cont = 0;
 if ($collection->validate()) {
 	$insertedCollection = $collectionsRepo->insert($collection);
 
-	if (($handle = fopen("metadados_mindio.csv", "r")) == TRUE) {
+	if (($handle = fopen("metadado.csv", "r")) == TRUE) {
 		
 		$collection_core_metadata = $metadataRepo->get_core_metadata($insertedCollection);
 		
@@ -66,9 +77,7 @@ if ($collection->validate()) {
 								var_dump($error);
 						}
 						
-						$metadata_type_options = ['taxonomy_id' => $insertedTaxonomy->get_id(), 
-									  'input_type' => 'tainacan-taxonomy-tag-input', 
-									  'allow_new_terms' => 'yes', 'multiple'=>'yes'];
+						$metadata_type_options = ['taxonomy_id' => $insertedTaxonomy->get_id(), 'input_type' => 'tainacan-taxonomy-tag-input', 'allow_new_terms' => 'yes', 'multiple'=>'yes'];
 						
 						$metadado = new \Tainacan\Entities\Metadatum();
 						$metadado->set_collection($insertedCollection);
@@ -79,6 +88,43 @@ if ($collection->validate()) {
 						$metadado->set_status('publish');
 						$metadado->set_display('no');
 						$metadado->set_metadata_type_options($metadata_type_options);
+						
+					}else if (trim($data[2]) == 'Tainacan\Metadata_Types\Relationship'){
+					
+						echo "\n","Metadado Relacionamento", "\n";
+						
+						if (trim($data[3]) == 'Entidade'){
+						
+							echo "\n","Metadado Relacionamento ENTIDADES", "\n";
+
+							$metadata_type_options = ['collection_id' => $entidades_collection->get_id(), 'multiple'=>'yes', 'repeated'=>'yes', 'input_type' => 'tainacan-taxonomy-tag-input', 'search'=>(string)$entidades_id->get_id()];
+							
+							$metadado = new \Tainacan\Entities\Metadatum();
+							$metadado->set_collection($insertedCollection);
+							$metadado->set_name(trim($data[0]));
+							$metadado->set_description($data[1]);
+							$metadado->set_metadata_type(trim($data[2]));
+							$metadado->set_multiple('yes');
+							$metadado->set_status('publish');
+							$metadado->set_display('no');
+							$metadado->set_metadata_type_options($metadata_type_options);
+							
+						}else if (trim($data[3]) == 'Pessoa'){
+						
+							echo "\n","Metadado Relacionamento PESSOAS", "\n";
+				
+							$metadata_type_options = ['collection_id' => $pessoas_collection->get_id(), 'multiple'=>'yes', 'repeated'=>'yes', 'input_type' => 'tainacan-taxonomy-tag-input', 'search'=>(string)$pessoas_id->get_id()];
+							
+							$metadado = new \Tainacan\Entities\Metadatum();
+							$metadado->set_collection($insertedCollection);
+							$metadado->set_name(trim($data[0]));
+							$metadado->set_description($data[1]);
+							$metadado->set_metadata_type(trim($data[2]));
+							$metadado->set_multiple('yes');
+							$metadado->set_status('publish');
+							$metadado->set_display('no');
+							$metadado->set_metadata_type_options($metadata_type_options);
+						}
 					
 					}else{
 					
@@ -122,4 +168,3 @@ if ($collection->validate()) {
 	die;
 }
 ?>
-
